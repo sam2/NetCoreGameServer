@@ -19,14 +19,14 @@ namespace GameServer
         public void AddClient(long id, Client client)
         {
             m_Clients.Add(id, client);
-            Console.WriteLine(client.Name + "has connected.");
+            Console.WriteLine(client.Name + " has connected.");
         }
 
         public void RemoveClient(long id)
         {
             string name = m_Clients[id].Name;
             m_Clients.Remove(id);
-            Console.WriteLine(name + "has disconnected.");
+            Console.WriteLine(name + " has disconnected.");
         }
     }
 }
