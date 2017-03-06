@@ -19,7 +19,9 @@ namespace ClientTest
 
             var msg = client.CreateMessage();
             var cm = new ChatMessage() { Message = "TESTING MESSAGE" };
-            msg.Write(JMessage.Serialize(JMessage.FromValue<ChatMessage>(cm)));
+
+            var serializer = new JMessage();
+            msg.Write(serializer.Serialize(JMessage.FromValue<ChatMessage>(cm)));
             client.SendMessage(msg, NetDeliveryMethod.ReliableOrdered);
 
             while(true)

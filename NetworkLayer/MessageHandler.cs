@@ -7,58 +7,28 @@ using System.Threading.Tasks;
 
 namespace NetworkLayer
 {
-    public class MessageHandler
+    public class DataPacketHandler
     {
         private NetServer m_Server;
+        private ISerializer m_Serializer;
         private Dictionary<Type, Action<object>> m_MessageTypes;
 
-        public MessageHandler(NetServer server)
+        public DataPacketHandler(NetServer server, ISerializer serializer)
         {
             m_Server = server;
+            m_Serializer = serializer;
             m_MessageTypes = new Dictionary<Type, Action<object>>();
         }
 
-        public void RegisterType<T>(Action<T> callback)
+        public void RegisterCallback<T>(Action<T> callback)
         {
             m_MessageTypes.Add(typeof(T), cb => callback((T)cb));
         }
 
-        public void Listen()
+        public void TriggerCallback(string data)
         {
-            NetIncomingMessage message;
-            while ((message = m_Server.ReadMessage()) != null)
-            {
-                switch (message.MessageType)
-                {
-                    case NetIncomingMessageType.Data:
-                        Console.WriteLine("data");
-                        JMessage msg = JMessage.Deserialize(message.ReadString());
-                        var obj = JsonConvert.DeserializeObject(msg.Value.ToString(), msg.Type);
-                        m_MessageTypes[msg.Type](obj);
-                        break;
-
-                    case NetIncomingMessageType.StatusChanged:
-                        // handle connection status messages
-                        Console.WriteLine(message.SenderConnection.Status);
-                        switch (message.SenderConnection.Status)
-                        {
-                            /* .. */
-                        }
-                        break;
-
-                    case NetIncomingMessageType.DebugMessage:
-                        // handle debug messages
-                        // (only received when compiled in DEBUG mode)
-                        Console.WriteLine(message.ReadString());
-                        break;
-
-                    /* .. */
-                    default:
-                        Console.WriteLine("unhandled message with type: "
-                            + message.MessageType);
-                        break;
-                }
-            }
+            var obj = m_Serializer.Deserialize(data);
+            m_MessageTypes[obj.GetType()](obj);
         }
     }
 }

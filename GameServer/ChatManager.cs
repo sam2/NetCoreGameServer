@@ -10,7 +10,7 @@ namespace GameServer
 
         public void ChatMessage(ChatMessage c)
         {
-            Console.WriteLine(c.Message);
+            Console.WriteLine("chat message: "+c.Message);
         }
     }
 }
