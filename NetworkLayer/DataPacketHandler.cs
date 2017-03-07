@@ -9,13 +9,11 @@ namespace NetworkLayer
 {
     public class DataPacketHandler
     {
-        private NetServer m_Server;
         private ISerializer m_Serializer;
         private Dictionary<Type, Action<object>> m_MessageTypes;
 
-        public DataPacketHandler(NetServer server, ISerializer serializer)
+        public DataPacketHandler(ISerializer serializer)
         {
-            m_Server = server;
             m_Serializer = serializer;
             m_MessageTypes = new Dictionary<Type, Action<object>>();
         }
