@@ -6,9 +6,7 @@ using System.Threading.Tasks;
 
 namespace NetworkLayer
 {
-    public delegate void ConnectedEventHandler(NetIncomingMessage message);
-    public delegate void DisonnectedEventHandler(NetIncomingMessage message);
-    public delegate void ReceivedMessageEventHandler(NetIncomingMessage message);
+    public delegate void MessageEventHandler(IMessage message);
 
     public class ServerManager
     {
@@ -16,10 +14,11 @@ namespace NetworkLayer
         private ISerializer m_Serializer;
         private Dictionary<Type, Action<object>> m_MessageTypes;
 
-
-        public event ConnectedEventHandler OnConnected;
-        public event DisonnectedEventHandler OnDisconnected;
-        public event ReceivedMessageEventHandler OnReceivedData;
+        public event MessageEventHandler OnConnectionApproved;
+        public event MessageEventHandler OnConnectionDenied;
+        public event MessageEventHandler OnConnected;
+        public event MessageEventHandler OnDisconnected;
+        public event MessageEventHandler OnReceivedData;
 
         public ServerManager(ISerializer serializer)
         {
@@ -27,6 +26,7 @@ namespace NetworkLayer
             config.Port = 12345;
             config.MaximumConnections = 10;
             config.ConnectionTimeout = 10;
+            config.EnableMessageType(NetIncomingMessageType.ConnectionApproval);
 
             m_Server = new NetServer(config);
             m_Serializer = serializer;
@@ -45,23 +45,35 @@ namespace NetworkLayer
             NetIncomingMessage message;
             while ((message = m_Server.ReadMessage()) != null)
             {
-                long id = message.SenderConnection.Peer.UniqueIdentifier;
                 switch (message.MessageType)
                 {
+                    case NetIncomingMessageType.ConnectionApproval:
+                        string name = message.PeekString();
+                        if (!string.IsNullOrEmpty(name))
+                        {
+                            ApproveConnection(message.SenderConnection);
+                            OnConnectionApproved?.Invoke(new LidgrenMessageWrapper(message));                            
+                        }
+                        else
+                        {
+                            DenyConnection(message.SenderConnection);
+                            OnConnectionDenied?.Invoke(new LidgrenMessageWrapper(message));  
+                        }
+                        break;
                     case NetIncomingMessageType.StatusChanged:
                         switch (message.SenderConnection.Status)
                         {
-                            case NetConnectionStatus.Connected:
-                                OnConnected?.Invoke(message);
+                            case NetConnectionStatus.Connected:                               
+                                OnConnected?.Invoke(new LidgrenMessageWrapper(message));                           
                                 break;
                             case NetConnectionStatus.Disconnected:
-                                OnDisconnected?.Invoke(message);
+                                OnDisconnected?.Invoke(new LidgrenMessageWrapper(message));
                                 break;
                         }
                         break;
                     case NetIncomingMessageType.Data:
                         TriggerCallback(message.ReadString());
-                        OnReceivedData?.Invoke(message);
+                        OnReceivedData?.Invoke(new LidgrenMessageWrapper(message));
                         break;
                     case NetIncomingMessageType.DebugMessage:
                         // handle debug messages
@@ -75,6 +87,7 @@ namespace NetworkLayer
                             + message.MessageType);
                         break;
                 }
+                
             }
         }
 
@@ -83,10 +96,24 @@ namespace NetworkLayer
             m_MessageTypes.Add(typeof(T), cb => callback((T)cb));
         }
 
-        public void TriggerCallback(string data)
+        private void TriggerCallback(string data)
         {
             var obj = m_Serializer.Deserialize(data);
             m_MessageTypes[obj.GetType()](obj);
         }
+
+        private void ApproveConnection(NetConnection connection)
+        {
+            var msg = m_Server.CreateMessage();
+            msg.Write("connected");
+            connection.Approve(msg);
+        }
+
+        private void DenyConnection(NetConnection connection)
+        {      
+            connection.Deny("denied");
+        }
+
+
     }
 }

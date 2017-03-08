@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GameServer.Logging
 {
-    interface ILoggerProvider
+    public interface ILoggerProvider
     {
         void Log(string message);
     }

@@ -16,6 +16,7 @@ namespace GameServer
             var sessionManager = new SessionManager<PlayerContext>();
             var chatManager = new ChatManager();
             var loggerFactory = new LoggerFactory();
+            var eventLogger = new ServerEventLogger(serverManager, loggerFactory);
 
             serverManager.RegisterDataCallback<ChatMessage>(chatManager.ChatMessage);
 

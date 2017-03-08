@@ -16,7 +16,7 @@ namespace GameServer.Logging
         Trace
     }
 
-    class Logger<T>
+    public class Logger<T>
     {
         public static bool IsEnabled { get; set; } = true;
 

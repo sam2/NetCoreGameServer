@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GameServer.Logging
 {
-    class LoggerFactory
+    public class LoggerFactory
     {
         private Dictionary<string, ILoggerProvider> m_Loggers = new Dictionary<string, ILoggerProvider>();
 
