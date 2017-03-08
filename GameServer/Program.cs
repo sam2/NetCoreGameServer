@@ -1,4 +1,4 @@
-﻿using Lidgren.Network;
+﻿using GameServer.Logging;
 using NetworkLayer;
 using System;
 using System.Collections.Generic;
@@ -11,58 +11,23 @@ namespace GameServer
     {
         public static void Main(string[] args)
         {
-            var config = new NetPeerConfiguration("test");
-            config.Port = 12345;
-            config.MaximumConnections = 10;
-            config.ConnectionTimeout = 10;
-            var server = new NetServer(config);
-
-            ClientManager clientManager = new ClientManager();
-
-            ChatManager chatManager = new ChatManager();
-
             var serializer = new JMessage();
+            var serverManager = new ServerManager(serializer);        
+            var sessionManager = new SessionManager<PlayerContext>();
+            var chatManager = new ChatManager();
+            var loggerFactory = new LoggerFactory();
 
-            DataPacketHandler handler = new DataPacketHandler(server, serializer);
-            handler.RegisterCallback<ChatMessage>(chatManager.ChatMessage);
+            serverManager.RegisterDataCallback<ChatMessage>(chatManager.ChatMessage);
 
-            server.Start();                   
+            loggerFactory.AddProvider(new ConsoleLogger());            
+
+            serverManager.Start();
+
+            Console.WriteLine(DateTime.Now.ToString("d") +" "+ DateTime.Now.ToString("t") + " - Server Started on port: " + serverManager.Port);
+             
             while (true)
             {
-                
-                NetIncomingMessage message;
-                while ((message = server.ReadMessage()) != null)
-                {
-                    long id = message.SenderConnection.Peer.UniqueIdentifier;
-                    switch (message.MessageType)
-                    {                     
-                        case NetIncomingMessageType.StatusChanged:
-                            switch (message.SenderConnection.Status)
-                            {
-                                case NetConnectionStatus.Connected:
-                                    clientManager.AddClient(id, new Client() { Name = "testUser" });                                    
-                                    break;
-                                case NetConnectionStatus.Disconnected:
-                                    clientManager.RemoveClient(id);
-                                    break;
-                            }
-                            break;
-                        case NetIncomingMessageType.Data:
-                            handler.TriggerCallback(message.ReadString());
-                            break;
-                        case NetIncomingMessageType.DebugMessage:
-                            // handle debug messages
-                            // (only received when compiled in DEBUG mode)
-                            Console.WriteLine(message.ReadString());
-                            break;
-
-                        /* .. */
-                        default:
-                            Console.WriteLine("unhandled message with type: "
-                                + message.MessageType);
-                            break;
-                    }
-                }
+                serverManager.HandleMessages();
             }
         }
 
