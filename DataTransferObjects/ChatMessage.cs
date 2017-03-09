@@ -1,9 +1,33 @@
 ﻿using System;
+using System.IO;
 
 namespace DataTransferObjects
 {
-    public class ChatMessage
+    public class ChatMessage : ISerializable
     {
         public string Message;
+
+        public void Deserialize(byte[] data)
+        {
+            using (MemoryStream m = new MemoryStream(data))
+            {
+                using (BinaryReader reader = new BinaryReader(m))
+                {
+                    Message = reader.ReadString();
+                }
+            }
+        }
+
+        public byte[] Serialize()
+        {
+            using (MemoryStream m = new MemoryStream())
+            {
+                using (BinaryWriter writer = new BinaryWriter(m))
+                {
+                    writer.Write(Message);
+                }
+                return m.ToArray();
+            }
+        }
     }
 }

@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
-
 using Lidgren.Network;
 using DataTransferObjects;
-using Newtonsoft.Json;
 
 public class ClientTest : MonoBehaviour {
 
@@ -43,13 +41,9 @@ public class ClientTest : MonoBehaviour {
         var cm = new ChatMessage() { Message = message };
         var msg = client.CreateMessage();
 
-        var dto = new Dto()
-        {
-            Type = EDtoType.ChatMessage,
-            Data = JsonConvert.SerializeObject(cm)
-        };
-        string cmjson = JsonConvert.SerializeObject(dto);
-        msg.Write(cmjson);
+        var dto = new Packet(PacketType.ChatMessage, cm);      
+
+        msg.Write(dto.SerializePacket());
 
         client.SendMessage(msg, NetDeliveryMethod.ReliableOrdered);
     }

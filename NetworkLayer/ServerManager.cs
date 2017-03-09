@@ -1,6 +1,5 @@
 ﻿using DataTransferObjects;
 using Lidgren.Network;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -73,7 +72,7 @@ namespace NetworkLayer
                         }
                         break;
                     case NetIncomingMessageType.Data:
-                        TriggerCallback(message.ReadString());
+                        TriggerCallback(message.Data);
                         OnReceivedData?.Invoke(new LidgrenMessageWrapper(message));
                         break;
                     case NetIncomingMessageType.DebugMessage:
@@ -97,13 +96,12 @@ namespace NetworkLayer
             m_MessageTypes.Add(typeof(T), cb => callback((T)cb));
         }
 
-        private void TriggerCallback(string data)
+        private void TriggerCallback(byte[] data)
         {
-            var dto = JsonConvert.DeserializeObject<Dto>(data);
-            Type t = DtoTypeMap.TypeMap[dto.Type];
+            var dto = Packet.Read(data);
+            var obj = dto.Data;
 
-            var dataObj = JsonConvert.DeserializeObject(dto.Data, t);
-            m_MessageTypes[t](dataObj);
+            m_MessageTypes[obj.GetType()](obj);
         }
 
         private void ApproveConnection(NetConnection connection)
