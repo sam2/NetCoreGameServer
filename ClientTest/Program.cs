@@ -1,4 +1,5 @@
-﻿using GameServer;
+﻿using DataTransferObjects;
+using GameServer;
 using Lidgren.Network;
 using NetworkLayer;
 using System;
@@ -21,20 +22,18 @@ namespace ClientTest
             client.Connect("127.0.0.1", 12345, hail);
 
             NetIncomingMessage message;
-            while(true)
+            bool connected = false;
+            while(!connected)
             {
                 if ((message = client.ReadMessage()) != null)
                 {
-                    Console.WriteLine(message.MessageType + " - " + message.ToString());
-                    if(message.MessageType == NetIncomingMessageType.StatusChanged)
-                    {
-                        Console.WriteLine(message.SenderConnection.Status);                        
-                    }
+                    Console.WriteLine(message.MessageType + " - " + message.ReadString());                    
+                    connected = message.SenderConnection.Status == NetConnectionStatus.Connected;
                 }
                 Thread.Sleep(10);
             }
             
-            bool connected = message.ReadBoolean();
+            
             string log = connected ? "Connected." : "Disconnected.";
             Console.WriteLine(log);
 

@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DataTransferObjects;
+using System.Threading;
 
 namespace GameServer
 {
@@ -11,8 +13,7 @@ namespace GameServer
     {
         public static void Main(string[] args)
         {
-            var serializer = new JMessage();
-            var serverManager = new ServerManager(serializer);        
+            var serverManager = new ServerManager();        
             var sessionManager = new SessionManager<PlayerContext>();
             var chatManager = new ChatManager();
             var loggerFactory = new LoggerFactory();
@@ -29,6 +30,7 @@ namespace GameServer
             while (true)
             {
                 serverManager.HandleMessages();
+                Thread.Sleep(10);
             }
         }
 

@@ -1,4 +1,6 @@
-﻿using Lidgren.Network;
+﻿using DataTransferObjects;
+using Lidgren.Network;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +13,6 @@ namespace NetworkLayer
     public class ServerManager
     {
         private NetServer m_Server;
-        private ISerializer m_Serializer;
         private Dictionary<Type, Action<object>> m_MessageTypes;
 
         public event MessageEventHandler OnConnectionApproved;
@@ -20,7 +21,7 @@ namespace NetworkLayer
         public event MessageEventHandler OnDisconnected;
         public event MessageEventHandler OnReceivedData;
 
-        public ServerManager(ISerializer serializer)
+        public ServerManager()
         {
             var config = new NetPeerConfiguration("test");
             config.Port = 12345;
@@ -29,7 +30,7 @@ namespace NetworkLayer
             config.EnableMessageType(NetIncomingMessageType.ConnectionApproval);
 
             m_Server = new NetServer(config);
-            m_Serializer = serializer;
+
             m_MessageTypes = new Dictionary<Type, Action<object>>();           
         }
 
@@ -98,8 +99,11 @@ namespace NetworkLayer
 
         private void TriggerCallback(string data)
         {
-            var obj = m_Serializer.Deserialize(data);
-            m_MessageTypes[obj.GetType()](obj);
+            var dto = JsonConvert.DeserializeObject<Dto>(data);
+            Type t = DtoTypeMap.TypeMap[dto.Type];
+
+            var dataObj = JsonConvert.DeserializeObject(dto.Data, t);
+            m_MessageTypes[t](dataObj);
         }
 
         private void ApproveConnection(NetConnection connection)
