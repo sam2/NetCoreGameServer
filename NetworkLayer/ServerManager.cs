@@ -1,5 +1,6 @@
 ﻿using DataTransferObjects;
 using Lidgren.Network;
+using NetworkLayer.Lidgren;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +30,7 @@ namespace NetworkLayer
             config.EnableMessageType(NetIncomingMessageType.ConnectionApproval);
 
             m_Server = new NetServer(config);
+            m_Server.Configuration.ConnectionTimeout = 10;
 
             m_MessageTypes = new Dictionary<Type, Action<object>>();           
         }
@@ -48,17 +50,17 @@ namespace NetworkLayer
                 switch (message.MessageType)
                 {
                     case NetIncomingMessageType.ConnectionApproval:
-                        string name = message.PeekString();
-                        if (!string.IsNullOrEmpty(name))
+                        try
                         {
+                            var packet = Packet.Read(message.Data);
                             ApproveConnection(message.SenderConnection);
-                            OnConnectionApproved?.Invoke(new LidgrenMessageWrapper(message));                            
+                            OnConnectionApproved?.Invoke(new LidgrenMessageWrapper(message));
                         }
-                        else
+                        catch (Exception e)
                         {
                             DenyConnection(message.SenderConnection);
-                            OnConnectionDenied?.Invoke(new LidgrenMessageWrapper(message));  
-                        }
+                            OnConnectionDenied?.Invoke(new LidgrenMessageWrapper(message));
+                        }                  
                         break;
                     case NetIncomingMessageType.StatusChanged:
                         switch (message.SenderConnection.Status)
@@ -78,9 +80,11 @@ namespace NetworkLayer
                     case NetIncomingMessageType.DebugMessage:
                         // handle debug messages
                         // (only received when compiled in DEBUG mode)
-                        Console.WriteLine(message.ReadString());
+                        Console.WriteLine("DEBUG: "+message.ReadString());
                         break;
-
+                    case NetIncomingMessageType.WarningMessage:
+                        Console.WriteLine("WARNING: "+message.ReadString());
+                        break;
                     /* .. */
                     default:
                         Console.WriteLine("unhandled message with type: "
@@ -99,7 +103,7 @@ namespace NetworkLayer
         private void TriggerCallback(byte[] data)
         {
             var dto = Packet.Read(data);
-            var obj = dto.Data;
+            var obj = dto.SerializedData;
 
             m_MessageTypes[obj.GetType()](obj);
         }

@@ -11,6 +11,7 @@ public class ClientTest : MonoBehaviour {
     void Awake()
     {
         var config = new NetPeerConfiguration("test");
+        config.ConnectionTimeout = 10;
         client = new NetClient(config);
     }
 
@@ -18,20 +19,26 @@ public class ClientTest : MonoBehaviour {
     {        
         client.Start();
         var hail = client.CreateMessage();
-        hail.Write("sam");
+        Identity id = new Identity()
+        {
+            Name = "ClientTest"
+        };
+
+        hail.Write(new Packet(PacketType.Identity, id).SerializePacket());
         client.Connect("127.0.0.1", 12345, hail);                 
     }
 	
 	// Update is called once per frame
 	void Update ()
     {
+        connected = client.ConnectionStatus != NetConnectionStatus.Disconnected;
+
         NetIncomingMessage message;
-        if (!connected)
+        if (connected)
         {
             while ((message = client.ReadMessage()) != null)
             {
-                Debug.Log(message.MessageType + " - " + message.ReadString());
-                connected = client.ConnectionStatus == NetConnectionStatus.Connected;
+                Debug.Log(message.MessageType + " - " + message.ReadString());                
             }
         }      
     }

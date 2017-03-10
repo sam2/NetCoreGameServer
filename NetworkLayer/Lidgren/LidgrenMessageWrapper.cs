@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace NetworkLayer
+namespace NetworkLayer.Lidgren
 {
     public class LidgrenMessageWrapper : IMessage
     {
@@ -15,9 +15,26 @@ namespace NetworkLayer
             m_Message = message;
         }
 
+        public IConnection Connection
+        {
+            get
+            {
+                return new LidgrenConnectionWrapper(m_Message.SenderConnection);
+            }
+        }
+
         public string Description()
         {
             return m_Message.MessageType + " - " + m_Message.ReadString();
         }
+
+        public byte[] Data
+        {
+            get
+            {
+                return m_Message.Data;
+            }
+        }
+        
     }
 }

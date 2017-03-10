@@ -12,6 +12,7 @@ namespace DataTransferObjects
 
     public enum PacketType
     {
-        ChatMessage
+        ChatMessage,
+        Identity
     }
 }

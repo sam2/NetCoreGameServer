@@ -7,13 +7,13 @@ namespace DataTransferObjects
 {
     public class Packet
     {
-        public ISerializable Data;
+        public ISerializable SerializedData;
         private PacketType Type;
 
         public Packet(PacketType packetType, ISerializable data)
         {
             Type = packetType;
-            Data = data;
+            SerializedData = data;
         }
 
         public byte[] SerializePacket()
@@ -23,7 +23,7 @@ namespace DataTransferObjects
                 using (BinaryWriter writer = new BinaryWriter(m))
                 {
                     writer.Write((byte)Type);
-                    writer.Write(Data.Serialize());
+                    writer.Write(SerializedData.Serialize());
                 }
                 return m.ToArray();
             }
@@ -41,17 +41,29 @@ namespace DataTransferObjects
                     data = reader.ReadAllBytes();
                 }
             }
-            return new Packet(p, GetData(p, data));
+
+            ISerializable sData = GetSerializedData(p, data);
+
+            if (sData == null)
+            {
+                throw new ArgumentException("Invalid Packet");
+            }
+
+            return new Packet(p,sData);
         }
 
-        static ISerializable GetData(PacketType packetType, byte[] data)
+        static ISerializable GetSerializedData(PacketType packetType, byte[] data)
         {
             switch (packetType)
             {
                 case PacketType.ChatMessage:
-                    var ret = new ChatMessage();
-                    ret.Deserialize(data);
-                    return ret;
+                    var cm = new ChatMessage();
+                    cm.Deserialize(data);
+                    return cm;
+                case PacketType.Identity:
+                    var id = new Identity();
+                    id.Deserialize(data);
+                    return id;
             }
             return null;
         }

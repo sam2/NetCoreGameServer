@@ -13,11 +13,11 @@ namespace GameServer
     {
         public static void Main(string[] args)
         {
-            var serverManager = new ServerManager();        
-            var sessionManager = new SessionManager<PlayerContext>();
-            var chatManager = new ChatManager();
             var loggerFactory = new LoggerFactory();
-            var eventLogger = new ServerEventLogger(serverManager, loggerFactory);
+            var serverManager = new ServerManager();        
+            var sessionManager = new SessionManager(loggerFactory, serverManager);
+            var chatManager = new ChatManager();            
+            //var eventLogger = new ServerEventLogger(serverManager, loggerFactory);
 
             serverManager.RegisterDataCallback<ChatMessage>(chatManager.ChatMessage);
 
