@@ -5,10 +5,10 @@ using System.Text;
 
 namespace NetworkLayer.Lidgren
 {
-    class LidgrenConnectionWrapper : IConnection
+    class LidgrenConnection : IConnection
     {
         private NetConnection m_NetConnection;
-        public LidgrenConnectionWrapper(NetConnection connection)
+        public LidgrenConnection(NetConnection connection)
         {
             m_NetConnection = connection;
         }

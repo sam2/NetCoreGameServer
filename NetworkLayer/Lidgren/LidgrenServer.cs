@@ -6,11 +6,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace NetworkLayer
+namespace NetworkLayer.Lidgren
 {
-    public delegate void MessageEventHandler(IMessage message);
+    
 
-    public class ServerManager
+    public class LidgrenServer : IServer
     {
         private NetServer m_Server;
         private Dictionary<Type, Action<object>> m_MessageTypes;
@@ -21,7 +21,7 @@ namespace NetworkLayer
         public event MessageEventHandler OnDisconnected;
         public event MessageEventHandler OnReceivedData;
 
-        public ServerManager()
+        public LidgrenServer()
         {
             var config = new NetPeerConfiguration("test");
             config.Port = 12345;
@@ -54,28 +54,28 @@ namespace NetworkLayer
                         {
                             var packet = Packet.Read(message.Data);
                             ApproveConnection(message.SenderConnection);
-                            OnConnectionApproved?.Invoke(new LidgrenMessageWrapper(message));
+                            OnConnectionApproved?.Invoke(new LidgrenMessage(message));
                         }
                         catch (Exception e)
                         {
                             DenyConnection(message.SenderConnection);
-                            OnConnectionDenied?.Invoke(new LidgrenMessageWrapper(message));
+                            OnConnectionDenied?.Invoke(new LidgrenMessage(message));
                         }                  
                         break;
                     case NetIncomingMessageType.StatusChanged:
                         switch (message.SenderConnection.Status)
                         {
                             case NetConnectionStatus.Connected:                               
-                                OnConnected?.Invoke(new LidgrenMessageWrapper(message));                           
+                                OnConnected?.Invoke(new LidgrenMessage(message));                           
                                 break;
                             case NetConnectionStatus.Disconnected:
-                                OnDisconnected?.Invoke(new LidgrenMessageWrapper(message));
+                                OnDisconnected?.Invoke(new LidgrenMessage(message));
                                 break;
                         }
                         break;
                     case NetIncomingMessageType.Data:
                         TriggerCallback(message.Data);
-                        OnReceivedData?.Invoke(new LidgrenMessageWrapper(message));
+                        OnReceivedData?.Invoke(new LidgrenMessage(message));
                         break;
                     case NetIncomingMessageType.DebugMessage:
                         // handle debug messages

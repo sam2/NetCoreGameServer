@@ -1,17 +1,13 @@
 ﻿using GameServer.Logging;
 using NetworkLayer;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace GameServer
+namespace GameServer.Services
 {
     public class ServerEventLogger
     {
         private Logger<ServerEventLogger> m_Logger;
 
-        public ServerEventLogger(ServerManager manager, LoggerFactory loggerFactory)
+        public ServerEventLogger(IServer manager, LoggerFactory loggerFactory)
         {
             m_Logger = loggerFactory.GetLogger<ServerEventLogger>();
 

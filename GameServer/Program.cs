@@ -1,11 +1,10 @@
 ﻿using GameServer.Logging;
 using NetworkLayer;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using DataTransferObjects;
 using System.Threading;
+using NetworkLayer.Lidgren;
+using GameServer.Services;
 
 namespace GameServer
 {
@@ -13,23 +12,24 @@ namespace GameServer
     {
         public static void Main(string[] args)
         {
-            var loggerFactory = new LoggerFactory();
-            var serverManager = new ServerManager();        
-            var sessionManager = new SessionManager(loggerFactory, serverManager);
+            IServer server = new LidgrenServer();
+
+            var loggerFactory = new LoggerFactory();                
+            var sessionManager = new SessionManager(loggerFactory, server);
             var chatManager = new ChatManager();            
             //var eventLogger = new ServerEventLogger(serverManager, loggerFactory);
 
-            serverManager.RegisterDataCallback<ChatMessage>(chatManager.ChatMessage);
+            server.RegisterDataCallback<ChatMessage>(chatManager.ChatMessage);
 
             loggerFactory.AddProvider(new ConsoleLogger());            
 
-            serverManager.Start();
+            server.Start();
 
-            Console.WriteLine(DateTime.Now.ToString("d") +" "+ DateTime.Now.ToString("t") + " - Server Started on port: " + serverManager.Port);
+            Console.WriteLine(DateTime.Now.ToString("d") +" "+ DateTime.Now.ToString("t") + " - Server Started on port: " + server.Port);
              
             while (true)
             {
-                serverManager.HandleMessages();
+                server.HandleMessages();
                 Thread.Sleep(10);
             }
         }

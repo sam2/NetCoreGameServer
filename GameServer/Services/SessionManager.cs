@@ -1,13 +1,11 @@
 ﻿using GameServer.Logging;
-using Lidgren.Network;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using NetworkLayer;
 using DataTransferObjects;
+using GameServer.DataModel;
 
-namespace GameServer
+namespace GameServer.Services
 {
     //TODO: decouple Lidgren - replace IConnection with IConnection
     public class SessionManager
@@ -16,9 +14,9 @@ namespace GameServer
 
         private Dictionary<IConnection, PlayerContext> m_Sessions;
         private Logger<SessionManager> m_Logger;
-        private ServerManager m_Server;
+        private IServer m_Server;
 
-        public SessionManager(LoggerFactory factory, ServerManager server)
+        public SessionManager(LoggerFactory factory, IServer server)
         {
             m_Logger = factory.GetLogger<SessionManager>();
             m_Sessions = new Dictionary<IConnection, PlayerContext>();

@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace NetworkLayer.Lidgren
 {
-    public class LidgrenMessageWrapper : IMessage
+    public class LidgrenMessage : IMessage
     {
         private NetIncomingMessage m_Message;
 
-        public LidgrenMessageWrapper(NetIncomingMessage message)
+        public LidgrenMessage(NetIncomingMessage message)
         {
             m_Message = message;
         }
@@ -19,7 +19,7 @@ namespace NetworkLayer.Lidgren
         {
             get
             {
-                return new LidgrenConnectionWrapper(m_Message.SenderConnection);
+                return new LidgrenConnection(m_Message.SenderConnection);
             }
         }
 
