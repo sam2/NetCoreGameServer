@@ -19,12 +19,12 @@ public class ClientTest : MonoBehaviour {
     {        
         client.Start();
         var hail = client.CreateMessage();
-        Identity id = new Identity()
+        AuthRequest id = new AuthRequest()
         {
             Name = "ClientTest"
         };
 
-        hail.Write(new Packet(PacketType.Identity, id).SerializePacket());
+        hail.Write(new Packet(PacketType.AuthRequest, id).SerializePacket());
         client.Connect("127.0.0.1", 12345, hail);                 
     }
 	
@@ -38,6 +38,17 @@ public class ClientTest : MonoBehaviour {
         {
             while ((message = client.ReadMessage()) != null)
             {
+                if(message.MessageType == NetIncomingMessageType.Data)
+                {
+                    var packet = Packet.Read(message.Data);
+                    switch(packet.Type)
+                    {
+                        case PacketType.ChatMessage:
+                            var cm = (ChatMessage)packet.SerializedData;
+                            Debug.Log(cm.SenderId + ": " + cm.Message);
+                            break;
+                    }
+                }
                 Debug.Log(message.MessageType + " - " + message.ReadString());                
             }
         }      
@@ -45,7 +56,7 @@ public class ClientTest : MonoBehaviour {
 
     public void SendChatMessage(string message)
     {
-        var cm = new ChatMessage() { Message = message };
+        var cm = new ChatMessage() { Message = message, SenderId = client.UniqueIdentifier };
         var msg = client.CreateMessage();
 
         var dto = new Packet(PacketType.ChatMessage, cm);      

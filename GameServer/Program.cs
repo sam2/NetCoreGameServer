@@ -12,11 +12,10 @@ namespace GameServer
     {
         public static void Main(string[] args)
         {
-            IServer server = new LidgrenServer();
-
+            var server = new LidgrenServer();
             var loggerFactory = new LoggerFactory();                
             var sessionManager = new SessionManager(loggerFactory, server);
-            var chatManager = new ChatManager();            
+            var chatManager = new ChatManager(server, loggerFactory);            
             //var eventLogger = new ServerEventLogger(serverManager, loggerFactory);
 
             server.RegisterDataCallback<ChatMessage>(chatManager.ChatMessage);

@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace DataTransferObjects
 {
-    public class Identity : ISerializable
+    class PlayerInfo : ISerializable
     {
+        public int Id { get; set; }
         public string Name { get; set; }
 
         public void Deserialize(byte[] data)
@@ -15,6 +17,7 @@ namespace DataTransferObjects
             {
                 using (BinaryReader reader = new BinaryReader(m))
                 {
+                    Id = reader.ReadInt32();
                     Name = reader.ReadString();
                 }
             }
@@ -26,6 +29,7 @@ namespace DataTransferObjects
             {
                 using (BinaryWriter writer = new BinaryWriter(m))
                 {
+                    writer.Write(Id);
                     writer.Write(Name);
                 }
                 return m.ToArray();

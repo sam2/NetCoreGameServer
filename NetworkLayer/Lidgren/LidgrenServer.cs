@@ -3,17 +3,26 @@ using Lidgren.Network;
 using NetworkLayer.Lidgren;
 using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace NetworkLayer.Lidgren
-{
-    
+{   
 
     public class LidgrenServer : IServer
     {
         private NetServer m_Server;
-        private Dictionary<Type, Action<object>> m_MessageTypes;
+        private Dictionary<Type, Action<IConnection, object>> m_MessageTypes;
+
+        private Dictionary<DeliveryMethod, NetDeliveryMethod> m_DeliveryMethodMap = new Dictionary<DeliveryMethod, NetDeliveryMethod>()
+        {
+            { DeliveryMethod.Unreliable, NetDeliveryMethod.Unreliable },
+            { DeliveryMethod.UnreliableSequenced, NetDeliveryMethod.UnreliableSequenced },
+            { DeliveryMethod.ReliableUnordered, NetDeliveryMethod.ReliableUnordered },
+            { DeliveryMethod.ReliableSequenced, NetDeliveryMethod.ReliableSequenced },
+            { DeliveryMethod.ReliableOrdered, NetDeliveryMethod.ReliableOrdered }    
+        };
 
         public event MessageEventHandler OnConnectionApproved;
         public event MessageEventHandler OnConnectionDenied;
@@ -32,7 +41,7 @@ namespace NetworkLayer.Lidgren
             m_Server = new NetServer(config);
             m_Server.Configuration.ConnectionTimeout = 10;
 
-            m_MessageTypes = new Dictionary<Type, Action<object>>();           
+            m_MessageTypes = new Dictionary<Type, Action<IConnection, object>>();           
         }
 
         public int Port { get { return m_Server.Port; } }
@@ -74,7 +83,7 @@ namespace NetworkLayer.Lidgren
                         }
                         break;
                     case NetIncomingMessageType.Data:
-                        TriggerCallback(message.Data);
+                        TriggerCallback(new LidgrenConnection(message.SenderConnection), message.Data);
                         OnReceivedData?.Invoke(new LidgrenMessage(message));
                         break;
                     case NetIncomingMessageType.DebugMessage:
@@ -90,22 +99,49 @@ namespace NetworkLayer.Lidgren
                         Console.WriteLine("unhandled message with type: "
                             + message.MessageType);
                         break;
-                }
-                
+                }                
             }
         }
 
-        public void RegisterDataCallback<T>(Action<T> callback)
+        public void RegisterDataCallback<T>(Action<IConnection, T> callback)
         {
-            m_MessageTypes.Add(typeof(T), cb => callback((T)cb));
+            m_MessageTypes.Add(typeof(T), (connection, cb) => callback(connection, (T)cb));
+        }     
+
+        public void SendAll(byte[] message, IConnection except, DeliveryMethod method, int channel)
+        {
+            NetConnection sender = m_Server.Connections.FirstOrDefault(x => x.RemoteUniqueIdentifier == except.Id);
+
+            if (sender == null)
+            {
+                throw new ArgumentException("Invalid except connection with id " + except.Id);
+            }
+
+            NetOutgoingMessage msg = m_Server.CreateMessage();
+            msg.Write(message);
+            m_Server.SendToAll(msg, sender, m_DeliveryMethodMap[method], channel);
         }
 
-        private void TriggerCallback(byte[] data)
+        public void Send(IConnection connection, byte[] message, DeliveryMethod method, int channel)
+        {
+            NetConnection recipient = m_Server.Connections.FirstOrDefault(x => x.RemoteUniqueIdentifier == connection.Id);
+
+            if(recipient == null)
+            {
+                throw new ArgumentException("Could not send message to connectionId " + connection.Id + ", connection does not exist.");
+            }
+
+            NetOutgoingMessage msg = m_Server.CreateMessage();
+            msg.Write(message);
+            m_Server.SendMessage(msg, recipient, m_DeliveryMethodMap[method], channel);
+        }
+
+        private void TriggerCallback(IConnection connection, byte[] data)
         {
             var dto = Packet.Read(data);
             var obj = dto.SerializedData;
 
-            m_MessageTypes[obj.GetType()](obj);
+            m_MessageTypes[obj.GetType()](connection, obj);
         }
 
         private void ApproveConnection(NetConnection connection)
@@ -120,6 +156,8 @@ namespace NetworkLayer.Lidgren
             connection.Deny("denied");
         }
 
-
+        
     }
+
+
 }

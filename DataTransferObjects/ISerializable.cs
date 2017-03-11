@@ -10,9 +10,5 @@ namespace DataTransferObjects
         void Deserialize(byte[] data);
     }
 
-    public enum PacketType
-    {
-        ChatMessage,
-        Identity
-    }
+ 
 }

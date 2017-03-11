@@ -14,7 +14,6 @@ namespace GameServer.Services
 
         private Dictionary<IConnection, PlayerContext> m_Sessions;
         private Logger<SessionManager> m_Logger;
-        private IServer m_Server;
 
         public SessionManager(LoggerFactory factory, IServer server)
         {
@@ -23,16 +22,15 @@ namespace GameServer.Services
 
             server.OnConnectionApproved += CreateSession;
             server.OnDisconnected += EndSession;
-
         }
 
         private void CreateSession(IMessage message)
         {
             try
             {
-                var id = (Identity)Packet.Read(message.Data).SerializedData;
+                var id = (AuthRequest)Packet.Read(message.Data).SerializedData;
 
-                PlayerContext player = new PlayerContext()
+                PlayerContext player = new PlayerContext(message.Connection.Id)
                 {
                     Name = id.Name
                 };

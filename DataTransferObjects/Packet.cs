@@ -8,7 +8,7 @@ namespace DataTransferObjects
     public class Packet
     {
         public ISerializable SerializedData;
-        private PacketType Type;
+        public PacketType Type;
 
         public Packet(PacketType packetType, ISerializable data)
         {
@@ -60,8 +60,8 @@ namespace DataTransferObjects
                     var cm = new ChatMessage();
                     cm.Deserialize(data);
                     return cm;
-                case PacketType.Identity:
-                    var id = new Identity();
+                case PacketType.AuthRequest:
+                    var id = new AuthRequest();
                     id.Deserialize(data);
                     return id;
             }
@@ -84,4 +84,10 @@ namespace DataTransferObjects
             }
         }
     }
+}
+
+public enum PacketType
+{
+    ChatMessage,
+    AuthRequest
 }

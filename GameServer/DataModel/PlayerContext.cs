@@ -7,6 +7,12 @@ namespace GameServer.DataModel
 {
     public class PlayerContext
     {
-        public string Name { get;set;}
+        public long Id { get; }
+        public string Name { get; set;}
+
+        public PlayerContext(long id)
+        {
+            Id = id;
+        }
     }
 }

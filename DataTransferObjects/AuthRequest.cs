@@ -1,12 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace DataTransferObjects
 {
-    public class ChatMessage : ISerializable
+    public class AuthRequest : ISerializable
     {
-        public long SenderId;
-        public string Message;
+        public string Name { get; set; }
 
         public void Deserialize(byte[] data)
         {
@@ -14,8 +15,7 @@ namespace DataTransferObjects
             {
                 using (BinaryReader reader = new BinaryReader(m))
                 {
-                    SenderId = reader.ReadInt64();
-                    Message = reader.ReadString();
+                    Name = reader.ReadString();
                 }
             }
         }
@@ -26,8 +26,7 @@ namespace DataTransferObjects
             {
                 using (BinaryWriter writer = new BinaryWriter(m))
                 {
-                    writer.Write(SenderId);
-                    writer.Write(Message);
+                    writer.Write(Name);
                 }
                 return m.ToArray();
             }
