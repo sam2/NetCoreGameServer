@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace GameServer.Services
+namespace DataTransferObjects
 {
     public enum MessageChannel
     {
