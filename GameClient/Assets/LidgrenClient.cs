@@ -6,7 +6,7 @@ using DataTransferObjects;
 public class LidgrenClient
 {
     private NetClient m_Client;
-    private const string k_ServerAddress = "127.0.0.1";
+    private const string k_ServerAddress = "167.114.120.164";
     private const int k_Port = 12345;
 
     public LidgrenClient()
