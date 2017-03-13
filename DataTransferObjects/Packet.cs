@@ -64,6 +64,11 @@ namespace DataTransferObjects
                     var id = new AuthRequest();
                     id.Deserialize(data);
                     return id;
+                case PacketType.RemotePlayer:
+                    var rp = new RemotePlayer();
+                    rp.Deserialize(data);
+                    return rp;
+
             }
             return null;
         }
@@ -86,8 +91,3 @@ namespace DataTransferObjects
     }
 }
 
-public enum PacketType
-{
-    ChatMessage,
-    AuthRequest
-}

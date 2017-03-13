@@ -4,6 +4,10 @@
     <TargetFramework>netcoreapp1.1</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='TestDebug|AnyCPU'" />
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseUnity|AnyCPU'" />
+
   <ItemGroup>
     <PackageReference Include="Lidgren.Network.Core" Version="8.0.30703" />
   </ItemGroup>

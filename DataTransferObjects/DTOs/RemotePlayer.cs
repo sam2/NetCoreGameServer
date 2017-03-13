@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 
 namespace DataTransferObjects
 {
-    class PlayerInfo : ISerializable
+    public class RemotePlayer : ISerializable
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
+        public long Id;
+        public string Name;
 
         public void Deserialize(byte[] data)
         {
@@ -17,7 +16,7 @@ namespace DataTransferObjects
             {
                 using (BinaryReader reader = new BinaryReader(m))
                 {
-                    Id = reader.ReadInt32();
+                    Id = reader.ReadInt64();
                     Name = reader.ReadString();
                 }
             }

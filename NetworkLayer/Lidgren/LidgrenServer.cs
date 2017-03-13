@@ -110,12 +110,16 @@ namespace NetworkLayer.Lidgren
 
         public void SendAll(byte[] message, IConnection except, DeliveryMethod method, int channel)
         {
-            NetConnection sender = m_Server.Connections.FirstOrDefault(x => x.RemoteUniqueIdentifier == except.Id);
-
-            if (sender == null)
+            NetConnection sender = null;
+            if (except != null)
             {
-                throw new ArgumentException("Invalid except connection with id " + except.Id);
+                sender = m_Server.Connections.FirstOrDefault(x => x.RemoteUniqueIdentifier == except.Id);
+
+                if (sender == null)
+                {
+                    throw new ArgumentException("Invalid except connection with id " + except.Id);               }
             }
+            
 
             NetOutgoingMessage msg = m_Server.CreateMessage();
             msg.Write(message);

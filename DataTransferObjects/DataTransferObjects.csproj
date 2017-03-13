@@ -1,7 +1,28 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <TargetFramework>netcoreapp1.1</TargetFramework>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'DebugUnity|AnyCPU'">
+    <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseUnity|AnyCPU'"> 
+    <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <PostBuildEvent>echo "$(SolutionDir)DataTransferObjects\bin\DebugUnity\DataTransferObjects.dll" "$(SolutionDir)GameClient\Assets\Modules\"
+xcopy /Y "$(SolutionDir)DataTransferObjects\bin\DebugUnity\DataTransferObjects.dll" "$(SolutionDir)GameClient\Assets\Modules\DataTransferObjects.dll"</PostBuildEvent>
   </PropertyGroup>
 
 </Project>
