@@ -30,6 +30,7 @@ namespace NetworkLayer
         event MessageEventHandler OnConnectionDenied;
         event MessageEventHandler OnConnected;
         event MessageEventHandler OnDisconnected;
+        event MessageEventHandler OnDisconnecting;
         event MessageEventHandler OnReceivedData;
 
         void RegisterDataCallback<T>(Action<IConnection, T> callback);

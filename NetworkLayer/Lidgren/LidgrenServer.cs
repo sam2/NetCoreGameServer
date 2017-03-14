@@ -28,6 +28,7 @@ namespace NetworkLayer.Lidgren
         public event MessageEventHandler OnConnectionDenied;
         public event MessageEventHandler OnConnected;
         public event MessageEventHandler OnDisconnected;
+        public event MessageEventHandler OnDisconnecting;
         public event MessageEventHandler OnReceivedData;
 
         public LidgrenServer()
@@ -78,8 +79,10 @@ namespace NetworkLayer.Lidgren
                                 OnConnected?.Invoke(new LidgrenMessage(message));                           
                                 break;
                             case NetConnectionStatus.Disconnected:
+                                OnDisconnecting?.Invoke(new LidgrenMessage(message)); //not firing from lidgren
                                 OnDisconnected?.Invoke(new LidgrenMessage(message));
                                 break;
+                          
                         }
                         break;
                     case NetIncomingMessageType.Data:

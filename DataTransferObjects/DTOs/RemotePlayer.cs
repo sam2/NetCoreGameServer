@@ -9,6 +9,7 @@ namespace DataTransferObjects
     {
         public long Id;
         public string Name;
+        public bool Connected { get; set; }
 
         public void Deserialize(byte[] data)
         {
@@ -18,6 +19,7 @@ namespace DataTransferObjects
                 {
                     Id = reader.ReadInt64();
                     Name = reader.ReadString();
+                    Connected = reader.ReadBoolean();
                 }
             }
         }
@@ -30,6 +32,7 @@ namespace DataTransferObjects
                 {
                     writer.Write(Id);
                     writer.Write(Name);
+                    writer.Write(Connected);
                 }
                 return m.ToArray();
             }

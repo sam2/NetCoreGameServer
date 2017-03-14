@@ -3,8 +3,12 @@ using System.Collections;
 using Lidgren.Network;
 using DataTransferObjects;
 
+public delegate void ChatEventHandler(ChatMessage message);
+public delegate void RemotePlayerJoinedHandler(RemotePlayer player);
+public delegate void RemotePlayerLeftHandler(RemotePlayer player);
+
 public class LidgrenClient
-{
+{    
     private NetClient m_Client;
     private const string k_ServerAddress = "127.0.0.1";
     private const int k_Port = 12345;
@@ -66,7 +70,8 @@ public class LidgrenClient
                         break;
                     case PacketType.RemotePlayer:
                         var rp = (RemotePlayer)packet.SerializedData;
-                        Debug.Log("Player " + rp.Name + " (" + rp.Id + ") has joined the game.");
+                        if(rp.Connected) Debug.Log("Player " + rp.Name + " (" + rp.Id + ") has joined the game.");
+                        else Debug.Log("Player " + rp.Name + " (" + rp.Id + ") has left the game.");
                         break;
                 }
             }               

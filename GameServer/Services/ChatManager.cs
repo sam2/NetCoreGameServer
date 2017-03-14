@@ -17,7 +17,6 @@ namespace GameServer.Services
             m_Logger = loggerFactory.GetLogger<ChatManager>();
             m_SessionManager = sessionManager;
 
-            m_Server.OnConnected += PlayerConnected;
             m_Server.RegisterDataCallback<ChatMessage>(ChatMessage);
         }
 
@@ -32,27 +31,6 @@ namespace GameServer.Services
             m_Server.SendAll(message.SerializePacket(), null, DeliveryMethod.ReliableOrdered, (int)MessageChannel.Chat);
         }
 
-        public void PlayerConnected(IMessage message)
-        {
-            string name = m_SessionManager.GetPlayerContext(message.Connection.Id)?.Name;
-            if(name == null)
-            {
-                m_Logger.Log(LogLevel.Error, "No session found for " + message.Connection.Id);
-            }
-
-            RemotePlayer p = new RemotePlayer()
-            {
-                Name = name,
-                Id = message.Connection.Id
-            };
-
-            Packet packet = new Packet(PacketType.RemotePlayer, p);
-            m_Server.SendAll(packet.SerializePacket(), null, DeliveryMethod.ReliableOrdered, (int)MessageChannel.Chat);
-        }
-
-        private void SendChatMessage(ChatMessage cm)
-        {
-
-        }
+       
     }
 }
